@@ -4,7 +4,6 @@ import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
 import com.example.simple_todo.service.TodoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.List;
 public class TodoController {
     private final TodoService todoService;
 
-    @Autowired
     public TodoController(TodoService todoService) {
         this.todoService = todoService;
     }
