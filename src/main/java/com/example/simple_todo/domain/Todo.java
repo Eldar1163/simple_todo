@@ -1,7 +1,5 @@
 package com.example.simple_todo.domain;
 
-import com.example.simple_todo.dtos.TodoDto;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,11 +16,8 @@ public class Todo {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public TodoDto todoToDto() {
-        TodoDto res = new TodoDto();
-        res.setTitle(title);
-        res.setDone(done);
-        return res;
+    public Todo() {
+
     }
 
     public Long getId() {
@@ -51,6 +46,13 @@ public class Todo {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Todo(String title, boolean done, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.title = title;
+        this.done = done;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
