@@ -6,6 +6,7 @@ import com.example.simple_todo.dto.TodoUpdateDto;
 import com.example.simple_todo.service.TodoService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,12 +24,12 @@ public class TodoController {
     }
 
     @PostMapping
-    public Todo create(@RequestBody TodoCreateDto todoCreate) {
+    public Todo create(@Valid @RequestBody TodoCreateDto todoCreate) {
         return todoService.create(todoCreate);
     }
 
     @PutMapping
-    public Todo update(@RequestBody TodoUpdateDto todo) {
+    public Todo update(@Valid @RequestBody TodoUpdateDto todo) {
         return todoService.update(todo);
     }
 

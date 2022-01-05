@@ -1,9 +1,16 @@
 package com.example.simple_todo.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 public class TodoUpdateDto {
     private long id;
+
+    @NotBlank(message = "Title is mandatory")
     private String title;
-    private boolean done;
+
+    @NotNull(message = "Done is mandatory")
+    private Boolean done;
 
     public String getTitle() {
         return title;
@@ -21,11 +28,11 @@ public class TodoUpdateDto {
         this.id = id;
     }
 
-    public boolean isDone() {
+    public Boolean isDone() {
         return done;
     }
 
-    public void setDone(boolean done) {
+    public void setDone(Boolean done) {
         this.done = done;
     }
 }

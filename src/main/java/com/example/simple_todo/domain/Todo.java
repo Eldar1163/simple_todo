@@ -12,7 +12,7 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String title;
-    private boolean done;
+    private Boolean done;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,11 +36,11 @@ public class Todo {
         this.title = title;
     }
 
-    public boolean isDone() {
+    public Boolean isDone() {
         return done;
     }
 
-    public void setDone(boolean done) {
+    public void setDone(Boolean done) {
         this.done = done;
     }
 
@@ -48,7 +48,7 @@ public class Todo {
         return createdAt;
     }
 
-    public Todo(String title, boolean done, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Todo(String title, Boolean done, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.done = done;
         this.createdAt = createdAt;
