@@ -1,10 +1,12 @@
-package com.example.simple_todo.controllers;
+package com.example.simple_todo.controller;
 
 import com.example.simple_todo.domain.Todo;
-import com.example.simple_todo.services.TodoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.simple_todo.dto.TodoCreateDto;
+import com.example.simple_todo.dto.TodoUpdateDto;
+import com.example.simple_todo.service.TodoService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -12,7 +14,6 @@ import java.util.List;
 public class TodoController {
     private final TodoService todoService;
 
-    @Autowired
     public TodoController(TodoService todoService) {
         this.todoService = todoService;
     }
@@ -23,12 +24,12 @@ public class TodoController {
     }
 
     @PostMapping
-    public Todo create(@RequestBody Todo todo) {
-        return todoService.create(todo);
+    public Todo create(@Valid @RequestBody TodoCreateDto todoCreate) {
+        return todoService.create(todoCreate);
     }
 
     @PutMapping
-    public Todo update(@RequestBody Todo todo) {
+    public Todo update(@Valid @RequestBody TodoUpdateDto todo) {
         return todoService.update(todo);
     }
 
