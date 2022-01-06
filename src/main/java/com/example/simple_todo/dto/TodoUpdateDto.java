@@ -4,7 +4,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 public class TodoUpdateDto {
-    private long id;
+    @NotNull(message = "Id is mandatory")
+    private Long id;
 
     @NotBlank(message = "Title is mandatory")
     private String title;
@@ -20,11 +21,11 @@ public class TodoUpdateDto {
         this.title = title;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
