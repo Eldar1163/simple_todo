@@ -4,14 +4,10 @@ import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
 import com.example.simple_todo.service.TodoService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/todo")
