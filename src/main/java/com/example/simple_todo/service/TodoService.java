@@ -36,7 +36,7 @@ public class TodoService {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found"));
         todo.setTitle(todoUpdate.getTitle());
-        todo.setDone(todoUpdate.isDone());
+        todo.setDone(todoUpdate.getDone());
         todo.setUpdatedAt(LocalDateTime.now());
         return todoRepository.save(todo);
     }

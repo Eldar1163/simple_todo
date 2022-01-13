@@ -1,0 +1,78 @@
+package com.example.simple_todo.jwt_util;
+
+import com.example.simple_todo.domain.User;
+import com.example.simple_todo.dto.UserJwtDto;
+import com.example.simple_todo.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+@Component
+public class JwtTokenUtil implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -1250185168462007488L;
+
+    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 1000;
+
+    @Value("jwt.secret")
+    private String secret;
+
+    private static final String userInfoClaimStr = "user-info";
+
+    private final UserService userService;
+
+    public JwtTokenUtil(UserService userService) {
+        this.userService = userService;
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    public boolean isNotExpiredToken(String token) {
+        final Date expirationDate = getExpirationDateFromToken(token);
+        final Date currentDate = new Date(System.currentTimeMillis());
+        return currentDate.before(expirationDate);
+    }
+
+    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims getAllClaimsFromToken(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    }
+
+    public String generateToken(Long userID) {
+        User user = userService.getUserById(userID);
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", user.getId());
+        userMap.put("username", user.getUsername());
+        return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY)).signWith(SignatureAlgorithm.HS512, secret).compact();
+    }
+
+    public UserJwtDto getUserJwtDtoFromToken(String token) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> userMap = (Map<String, Object>) Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get(userInfoClaimStr);
+        return new UserJwtDto(((Number) userMap.get("id")).longValue(), (String) userMap.get("username"));
+    }
+
+    public Boolean isValidToken(String token) {
+        try {
+            return Jwts.parser().setSigningKey(secret).isSigned(token) && isNotExpiredToken(token);
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+}
