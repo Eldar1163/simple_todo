@@ -1,9 +1,9 @@
-package com.example.simple_todo.сonfig.jwt;
+package com.example.simple_todo.config.jwt;
 
 import com.example.simple_todo.dto.UserJwtDto;
 import com.example.simple_todo.jwt_util.JwtTokenUtil;
 import com.example.simple_todo.service.JwtUserDetailsService;
-import com.example.simple_todo.сonfig.TodoUserDetails;
+import com.example.simple_todo.config.TodoUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

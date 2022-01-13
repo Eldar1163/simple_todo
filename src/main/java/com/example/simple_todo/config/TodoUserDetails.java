@@ -1,4 +1,4 @@
-package com.example.simple_todo.сonfig;
+package com.example.simple_todo.config;
 
 import com.example.simple_todo.domain.User;
 import org.springframework.security.core.GrantedAuthority;

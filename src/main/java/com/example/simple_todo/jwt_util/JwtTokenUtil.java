@@ -1,9 +1,9 @@
 package com.example.simple_todo.jwt_util;
 
+import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.UserJwtDto;
 import com.example.simple_todo.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.Serial;
@@ -24,15 +24,15 @@ public class JwtTokenUtil implements Serializable {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 1000;
 
-    @Value("jwt.secret")
-    private String secret;
-
     private static final String userInfoClaimStr = "user-info";
+
+    private final String secret;
 
     private final UserService userService;
 
-    public JwtTokenUtil(UserService userService) {
+    public JwtTokenUtil(UserService userService, ConfigProperties configProperties) {
         this.userService = userService;
+        secret = configProperties.getJwt().getSecret();
     }
 
     public Date getExpirationDateFromToken(String token) {
