@@ -4,8 +4,6 @@ import com.example.simple_todo.domain.User;
 import com.example.simple_todo.exception.InvalidPasswordException;
 import com.example.simple_todo.exception.UserNotFoundException;
 import com.example.simple_todo.repository.UserRepository;
-import com.example.simple_todo.config.TodoUserDetails;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,16 +29,11 @@ public class UserService {
     }
 
     public User getUserByUsernameAndPassword(String username, String password) {
-            User user = userRepository.findByUsername(username).orElseThrow(()-> new UserNotFoundException(username));
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            if (encoder.matches(password, user.getPassword()))
-                return user;
-            else
-                throw new InvalidPasswordException();
-    }
-
-    public UserDetails getUserDetailsByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-        return TodoUserDetails.fromUserToTodoUserDetails(user);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        if (encoder.matches(password, user.getPassword()))
+            return user;
+        else
+            throw new InvalidPasswordException();
     }
 }

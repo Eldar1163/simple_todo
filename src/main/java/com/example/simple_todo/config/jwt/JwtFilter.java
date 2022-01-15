@@ -2,8 +2,6 @@ package com.example.simple_todo.config.jwt;
 
 import com.example.simple_todo.dto.UserJwtDto;
 import com.example.simple_todo.jwt_util.JwtTokenUtil;
-import com.example.simple_todo.service.JwtUserDetailsService;
-import com.example.simple_todo.config.TodoUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,11 +23,8 @@ public class JwtFilter extends GenericFilterBean {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    private final JwtUserDetailsService jwtUserDetailsService;
-
-    public JwtFilter(JwtTokenUtil jwtTokenUtil, JwtUserDetailsService jwtUserDetailsService) {
+    public JwtFilter(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
-        this.jwtUserDetailsService = jwtUserDetailsService;
     }
 
     @Override
@@ -37,9 +32,7 @@ public class JwtFilter extends GenericFilterBean {
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
         if (token != null && jwtTokenUtil.isValidToken(token)) {
             UserJwtDto userJwtDto = jwtTokenUtil.getUserJwtDtoFromToken(token);
-            String username = userJwtDto.getUsername();
-            TodoUserDetails todoUserDetails = (TodoUserDetails) jwtUserDetailsService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(todoUserDetails, null, null);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userJwtDto, null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(servletRequest, servletResponse);
