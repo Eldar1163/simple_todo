@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/todo/register").permitAll()
                 .antMatchers("/api/todo/auth").permitAll()
                 .antMatchers("/api/todo").authenticated()
+                .antMatchers("/api/todo/*").authenticated()
                 .and();
 
         http.addFilterBefore(

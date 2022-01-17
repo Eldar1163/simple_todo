@@ -17,6 +17,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import static io.jsonwebtoken.lang.Strings.hasText;
+
 @Component
 public class JwtTokenUtil implements Serializable {
     @Serial
@@ -74,5 +76,21 @@ public class JwtTokenUtil implements Serializable {
         } catch (Exception exception) {
             return false;
         }
+    }
+
+    public String getTokenFromAuthHeader(String authStr) {
+        if (hasText(authStr) && authStr.startsWith("Bearer ")) {
+            return authStr.substring(7);
+        }
+        return null;
+    }
+
+    public Long getUserIdFromAuthHeader(String authStr) {
+        String token = getTokenFromAuthHeader(authStr);
+        if (token != null && isValidToken(token)) {
+            UserJwtDto userJwtDto = getUserJwtDtoFromToken(token);
+            return userJwtDto.getId();
+        }
+        return null;
     }
 }

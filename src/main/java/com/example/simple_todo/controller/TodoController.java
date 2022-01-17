@@ -19,22 +19,25 @@ public class TodoController {
     }
 
     @GetMapping
-    public List<Todo> getAll() {
-        return todoService.getAll();
+    public List<Todo> getAll(@RequestHeader (name = "Authorization") String authStr) {
+        return todoService.getAllTodoByUserId(authStr);
     }
 
     @PostMapping
-    public Todo create(@Valid @RequestBody TodoCreateDto todoCreate) {
-        return todoService.create(todoCreate);
+    public Todo create(@RequestHeader (name = "Authorization") String authStr,
+                       @Valid @RequestBody TodoCreateDto todoCreate) {
+        return todoService.create(authStr, todoCreate);
     }
 
     @PutMapping
-    public Todo update(@Valid @RequestBody TodoUpdateDto todo) {
-        return todoService.update(todo);
+    public Todo update(@RequestHeader (name = "Authorization") String authStr,
+                       @Valid @RequestBody TodoUpdateDto todo) {
+        return todoService.update(authStr, todo);
     }
 
     @DeleteMapping(value = "/{id}")
-    public void deleteById(@PathVariable("id") Long id) {
-        todoService.delete(id);
+    public void deleteById(@RequestHeader (name = "Authorization") String authStr,
+                           @PathVariable("id") Long id) {
+        todoService.delete(authStr, id);
     }
 }

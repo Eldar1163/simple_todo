@@ -14,8 +14,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static io.jsonwebtoken.lang.Strings.hasText;
-
 @Component
 public class JwtFilter extends GenericFilterBean {
 
@@ -29,20 +27,13 @@ public class JwtFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        String token = getTokenFromRequest((HttpServletRequest) servletRequest);
+        String authStr = ((HttpServletRequest) servletRequest).getHeader(AUTHORIZATION);
+        String token = jwtTokenUtil.getTokenFromAuthHeader(authStr);
         if (token != null && jwtTokenUtil.isValidToken(token)) {
             UserJwtDto userJwtDto = jwtTokenUtil.getUserJwtDtoFromToken(token);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userJwtDto, null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(servletRequest, servletResponse);
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request) {
-        String bearer = request.getHeader(AUTHORIZATION);
-        if (hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        return null;
     }
 }
