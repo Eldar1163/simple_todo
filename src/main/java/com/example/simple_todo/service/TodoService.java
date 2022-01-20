@@ -19,13 +19,20 @@ public class TodoService {
         this.todoRepository = todoRepository;
     }
 
-    public List<Todo> getAll() {
-        return todoRepository.findAll();
+    public List<Todo> getAllWhereParentIsNull() {
+        return todoRepository.findAllByParentIsNull();
     }
 
     public Todo create(TodoCreateDto todoCreate) {
+        Todo parent = null;
+        if (todoCreate.getParent() != null) {
+            parent = todoRepository.findById(todoCreate.getParent())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo"));
+        }
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Todo todo = new Todo(todoCreate.getTitle(),
+        Todo todo = new Todo(
+                parent,
+                todoCreate.getTitle(),
                 false,
                 currentDateTime,
                 currentDateTime);

@@ -20,7 +20,7 @@ public class TodoController {
 
     @GetMapping
     public List<Todo> getAll() {
-        return todoService.getAll();
+        return todoService.getAllWhereParentIsNull();
     }
 
     @PostMapping
