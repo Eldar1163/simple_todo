@@ -39,13 +39,14 @@ public class TodoService {
         return todoRepository.save(todo);
     }
 
-    public Todo update(TodoUpdateDto todoUpdate) {
+    public String update(TodoUpdateDto todoUpdate) {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found"));
         todo.setTitle(todoUpdate.getTitle());
         todo.setDone(todoUpdate.isDone());
         todo.setUpdatedAt(LocalDateTime.now());
-        return todoRepository.save(todo);
+        todoRepository.save(todo);
+        return "Successfully updated";
     }
 
     public void delete(Long id) {
