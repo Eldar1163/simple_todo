@@ -24,11 +24,10 @@ public class TodoService {
     }
 
     public Todo create(TodoCreateDto todoCreate) {
-        Todo parent = null;
-        if (todoCreate.getParent() != null) {
-            parent = todoRepository.findById(todoCreate.getParent())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo"));
-        }
+        Todo parent = (todoCreate.getParent() != null) ?
+                todoRepository.findById(todoCreate.getParent())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")):
+                null;
         LocalDateTime currentDateTime = LocalDateTime.now();
         Todo todo = new Todo(
                 parent,
