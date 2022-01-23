@@ -29,7 +29,7 @@ public class TodoController {
     }
 
     @PutMapping
-    public String update(@Valid @RequestBody TodoUpdateDto todo) {
+    public TodoUpdateDto update(@Valid @RequestBody TodoUpdateDto todo) {
         return todoService.update(todo);
     }
 

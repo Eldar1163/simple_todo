@@ -26,7 +26,7 @@ public class TodoService {
     public Todo create(TodoCreateDto todoCreate) {
         Todo parent = (todoCreate.getParent() != null) ?
                 todoRepository.findById(todoCreate.getParent())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")):
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")) :
                 null;
         LocalDateTime currentDateTime = LocalDateTime.now();
         Todo todo = new Todo(
@@ -38,14 +38,20 @@ public class TodoService {
         return todoRepository.save(todo);
     }
 
-    public String update(TodoUpdateDto todoUpdate) {
+    public TodoUpdateDto update(TodoUpdateDto todoUpdate) {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found"));
         todo.setTitle(todoUpdate.getTitle());
         todo.setDone(todoUpdate.isDone());
         todo.setUpdatedAt(LocalDateTime.now());
+        TodoUpdateDto responseDto = new TodoUpdateDto(
+                todo.getId(),
+                todo.getTitle(),
+                todo.isDone(),
+                todo.getCreatedAt(),
+                todo.getUpdatedAt());
         todoRepository.save(todo);
-        return "Successfully updated";
+        return responseDto;
     }
 
     public void delete(Long id) {
