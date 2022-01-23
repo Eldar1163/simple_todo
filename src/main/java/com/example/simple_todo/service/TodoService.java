@@ -30,16 +30,23 @@ public class TodoService {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    public List<Todo> getAllTodoByUserId(String authStr) {
+    public List<Todo> getAll(String authStr) {
         Long id = jwtTokenUtil.getUserIdFromAuthHeader(authStr);
-        return todoRepository.findAllByUserId(id);
+        return todoRepository.findAllByUserIdAndParentIsNull(id);
     }
 
     public Todo create(String authStr, TodoCreateDto todoCreate) {
-        User user = userRepository.getById(jwtTokenUtil.getUserIdFromAuthHeader(authStr));
+        User user = userRepository.findById(jwtTokenUtil.getUserIdFromAuthHeader(authStr)).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found user, check your token")
+        );
+        Todo parent = (todoCreate.getParent() != null) ?
+                todoRepository.findById(todoCreate.getParent())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")) :
+                null;
         LocalDateTime currentDateTime = LocalDateTime.now();
         Todo todo = new Todo(
                 user,
+                parent,
                 todoCreate.getTitle(),
                 false,
                 currentDateTime,
@@ -47,7 +54,7 @@ public class TodoService {
         return todoRepository.save(todo);
     }
 
-    public Todo update(String authStr, TodoUpdateDto todoUpdate) {
+    public TodoUpdateDto update(String authStr, TodoUpdateDto todoUpdate) {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -57,7 +64,14 @@ public class TodoService {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
             todo.setUpdatedAt(LocalDateTime.now());
-            return todoRepository.save(todo);
+            TodoUpdateDto responseDto = new TodoUpdateDto(
+                    todo.getId(),
+                    todo.getTitle(),
+                    todo.getDone(),
+                    todo.getCreatedAt(),
+                    todo.getUpdatedAt());
+            todoRepository.save(todo);
+            return responseDto;
         }
         else {
             throw new ResponseStatusException(

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 @Data
@@ -12,4 +13,7 @@ import javax.validation.constraints.NotBlank;
 public class TodoCreateDto {
     @NotBlank(message = "Title is mandatory")
     private String title;
+
+    @Min(value = 1)
+    private Long parent;
 }

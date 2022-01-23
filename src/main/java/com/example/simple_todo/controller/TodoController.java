@@ -20,7 +20,7 @@ public class TodoController {
 
     @GetMapping
     public List<Todo> getAll(@RequestHeader (name = "Authorization") String authStr) {
-        return todoService.getAllTodoByUserId(authStr);
+        return todoService.getAll(authStr);
     }
 
     @PostMapping
@@ -30,8 +30,9 @@ public class TodoController {
     }
 
     @PutMapping
-    public Todo update(@RequestHeader (name = "Authorization") String authStr,
-                       @Valid @RequestBody TodoUpdateDto todo) {
+    public TodoUpdateDto update(
+            @RequestHeader (name = "Authorization") String authStr,
+            @Valid @RequestBody TodoUpdateDto todo) {
         return todoService.update(authStr, todo);
     }
 

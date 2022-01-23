@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +18,8 @@ public class TodoUpdateDto {
 
     @NotNull(message = "Done is mandatory")
     private Boolean done;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }
