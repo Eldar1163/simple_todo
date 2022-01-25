@@ -4,6 +4,7 @@ import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
 import com.example.simple_todo.service.TodoService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,26 +20,28 @@ public class TodoController {
     }
 
     @GetMapping
-    public List<Todo> getAll(@RequestHeader (name = "Authorization") String authStr) {
-        return todoService.getAll(authStr);
+    public List<Todo> getAll(Authentication auth) {
+        return todoService.getAll(auth);
     }
 
     @PostMapping
-    public Todo create(@RequestHeader (name = "Authorization") String authStr,
-                       @Valid @RequestBody TodoCreateDto todoCreate) {
-        return todoService.create(authStr, todoCreate);
+    public Todo create(
+            Authentication auth,
+            @Valid @RequestBody TodoCreateDto todoCreate) {
+        return todoService.create(auth, todoCreate);
     }
 
     @PutMapping
     public TodoUpdateDto update(
-            @RequestHeader (name = "Authorization") String authStr,
+            Authentication auth,
             @Valid @RequestBody TodoUpdateDto todo) {
-        return todoService.update(authStr, todo);
+        return todoService.update(auth, todo);
     }
 
     @DeleteMapping(value = "/{id}")
-    public void deleteById(@RequestHeader (name = "Authorization") String authStr,
-                           @PathVariable("id") Long id) {
-        todoService.delete(authStr, id);
+    public void deleteById(
+            Authentication auth,
+            @PathVariable("id") Long id) {
+        todoService.delete(auth, id);
     }
 }

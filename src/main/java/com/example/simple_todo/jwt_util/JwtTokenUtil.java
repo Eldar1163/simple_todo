@@ -2,7 +2,7 @@ package com.example.simple_todo.jwt_util;
 
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.User;
-import com.example.simple_todo.dto.UserJwtDto;
+import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.service.UserService;
 import org.springframework.stereotype.Component;
 
@@ -64,10 +64,10 @@ public class JwtTokenUtil implements Serializable {
         return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY)).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
-    public UserJwtDto getUserJwtDtoFromToken(String token) {
+    public UserClaims getUserJwtDtoFromToken(String token) {
         @SuppressWarnings("unchecked")
         Map<String, Object> userMap = (Map<String, Object>) Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get(userInfoClaimStr);
-        return new UserJwtDto(((Number) userMap.get("id")).longValue(), (String) userMap.get("username"));
+        return new UserClaims(((Number) userMap.get("id")).longValue(), (String) userMap.get("username"));
     }
 
     public Boolean isValidToken(String token) {
@@ -81,15 +81,6 @@ public class JwtTokenUtil implements Serializable {
     public String getTokenFromAuthHeader(String authStr) {
         if (hasText(authStr) && authStr.startsWith("Bearer ")) {
             return authStr.substring(7);
-        }
-        return null;
-    }
-
-    public Long getUserIdFromAuthHeader(String authStr) {
-        String token = getTokenFromAuthHeader(authStr);
-        if (token != null && isValidToken(token)) {
-            UserJwtDto userJwtDto = getUserJwtDtoFromToken(token);
-            return userJwtDto.getId();
         }
         return null;
     }

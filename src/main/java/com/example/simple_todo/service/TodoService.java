@@ -4,10 +4,12 @@ import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
+import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.jwt_util.JwtTokenUtil;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,13 +32,14 @@ public class TodoService {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    public List<Todo> getAll(String authStr) {
-        Long id = jwtTokenUtil.getUserIdFromAuthHeader(authStr);
+    public List<Todo> getAll(Authentication auth) {
+        Long id = ((UserClaims)auth.getPrincipal()).getId();
         return todoRepository.findAllByUserIdAndParentIsNull(id);
     }
 
-    public Todo create(String authStr, TodoCreateDto todoCreate) {
-        User user = userRepository.findById(jwtTokenUtil.getUserIdFromAuthHeader(authStr)).orElseThrow(
+    public Todo create(Authentication auth, TodoCreateDto todoCreate) {
+        Long id = ((UserClaims)auth.getPrincipal()).getId();
+        User user = userRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found user, check your token")
         );
         Todo parent = (todoCreate.getParent() != null) ?
@@ -54,12 +57,12 @@ public class TodoService {
         return todoRepository.save(todo);
     }
 
-    public TodoUpdateDto update(String authStr, TodoUpdateDto todoUpdate) {
+    public TodoUpdateDto update(Authentication auth, TodoUpdateDto todoUpdate) {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Cannot found todo with id = " + todoUpdate.getId()));
-        Long userId = jwtTokenUtil.getUserIdFromAuthHeader(authStr);
+        Long userId = ((UserClaims)auth.getPrincipal()).getId();
         if (userId.equals(todo.getUser().getId())) {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
@@ -80,8 +83,8 @@ public class TodoService {
         }
     }
 
-    public void delete(String authStr, Long id) {
-        Long userId = jwtTokenUtil.getUserIdFromAuthHeader(authStr);
+    public void delete(Authentication auth, Long id) {
+        Long userId = ((UserClaims)auth.getPrincipal()).getId();
         Todo todo = todoRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found todo with id = " + id));
         if (userId.equals(todo.getUser().getId()))

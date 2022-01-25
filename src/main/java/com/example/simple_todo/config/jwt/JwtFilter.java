@@ -1,6 +1,6 @@
 package com.example.simple_todo.config.jwt;
 
-import com.example.simple_todo.dto.UserJwtDto;
+import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.jwt_util.JwtTokenUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,8 +30,8 @@ public class JwtFilter extends GenericFilterBean {
         String authStr = ((HttpServletRequest) servletRequest).getHeader(AUTHORIZATION);
         String token = jwtTokenUtil.getTokenFromAuthHeader(authStr);
         if (token != null && jwtTokenUtil.isValidToken(token)) {
-            UserJwtDto userJwtDto = jwtTokenUtil.getUserJwtDtoFromToken(token);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userJwtDto, null, null);
+            UserClaims userClaims = jwtTokenUtil.getUserJwtDtoFromToken(token);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userClaims, null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(servletRequest, servletResponse);
