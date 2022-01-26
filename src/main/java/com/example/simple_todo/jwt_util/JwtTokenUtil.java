@@ -26,7 +26,7 @@ public class JwtTokenUtil implements Serializable {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 1000;
 
-    private static final String userInfoClaimStr = "user-info";
+    public static final String userInfoClaimStr = "user-info";
 
     private final String secret;
 
