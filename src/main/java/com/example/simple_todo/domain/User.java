@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(schema = "public")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
