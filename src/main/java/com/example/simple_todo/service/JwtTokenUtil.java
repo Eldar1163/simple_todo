@@ -3,7 +3,6 @@ package com.example.simple_todo.service;
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.UserClaims;
-import com.example.simple_todo.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.io.Serial;
@@ -22,17 +21,18 @@ public class JwtTokenUtil implements Serializable {
     @Serial
     private static final long serialVersionUID = -1250185168462007488L;
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 1000;
-
     private static final String userInfoClaimStr = "user-info";
 
     private final String secret;
+
+    public final long jwt_token_validity;
 
     private final UserService userService;
 
     public JwtTokenUtil(UserService userService, ConfigProperties configProperties) {
         this.userService = userService;
         secret = configProperties.getJwt().getSecret();
+        jwt_token_validity = configProperties.getJwt().getToken_validity_in_millis();
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -50,7 +50,7 @@ public class JwtTokenUtil implements Serializable {
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("id", user.getId());
         userMap.put("username", user.getUsername());
-        return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY)).signWith(SignatureAlgorithm.HS512, secret).compact();
+        return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + jwt_token_validity)).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
     public UserClaims getUserClaimsFromToken(String token) {

@@ -1,7 +1,6 @@
 package com.example.simple_todo.exception;
 
 import com.example.simple_todo.dto.ErrorDto;
-import com.example.simple_todo.exception.InvalidPasswordException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
