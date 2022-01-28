@@ -2,9 +2,7 @@ package com.example.simple_todo.service;
 
 import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.domain.User;
-import com.example.simple_todo.dto.TodoCreateDto;
-import com.example.simple_todo.dto.TodoUpdateDto;
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.dto.*;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -27,12 +25,15 @@ public class TodoService {
         this.userRepository = userRepository;
     }
 
-    public List<Todo> getAll(Authentication auth) {
+    public List<TodoReadDto> getAll(Authentication auth) {
         Long id = ((UserClaims)auth.getPrincipal()).getId();
-        return todoRepository.findAllByUserIdAndParentIsNull(id);
+
+        return ObjectMapperUtils.mapAll(
+                todoRepository.findAllByUserIdAndParentIsNull(id),
+                TodoReadDto.class);
     }
 
-    public Todo create(Authentication auth, TodoCreateDto todoCreate) {
+    public TodoReadDto create(Authentication auth, TodoCreateDto todoCreate) {
         Long id = ((UserClaims)auth.getPrincipal()).getId();
         User user = userRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found user, check your token")
@@ -49,7 +50,8 @@ public class TodoService {
                 false,
                 currentDateTime,
                 currentDateTime);
-        return todoRepository.save(todo);
+        todoRepository.save(todo);
+        return ObjectMapperUtils.map(todo, TodoReadDto.class);
     }
 
     public TodoUpdateDto update(Authentication auth, TodoUpdateDto todoUpdate) {
