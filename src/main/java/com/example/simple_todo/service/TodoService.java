@@ -22,8 +22,7 @@ public class TodoService {
     private final UserRepository userRepository;
 
     public TodoService(TodoRepository todoRepository,
-                       UserRepository userRepository,
-                       JwtTokenUtil jwtTokenUtil) {
+                       UserRepository userRepository) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
     }
