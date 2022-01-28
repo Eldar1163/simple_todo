@@ -5,7 +5,6 @@ import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
 import com.example.simple_todo.dto.UserClaims;
-import com.example.simple_todo.jwt_util.JwtTokenUtil;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -22,14 +21,11 @@ public class TodoService {
 
     private final UserRepository userRepository;
 
-    private final JwtTokenUtil jwtTokenUtil;
-
     public TodoService(TodoRepository todoRepository,
                        UserRepository userRepository,
                        JwtTokenUtil jwtTokenUtil) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
-        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     public List<Todo> getAll(Authentication auth) {

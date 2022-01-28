@@ -1,4 +1,4 @@
-package com.example.simple_todo.exception_handler;
+package com.example.simple_todo.exception;
 
 import com.example.simple_todo.dto.ErrorDto;
 import com.example.simple_todo.exception.InvalidPasswordException;

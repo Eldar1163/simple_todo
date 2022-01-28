@@ -1,4 +1,4 @@
-package com.example.simple_todo.jwt_util;
+package com.example.simple_todo.service;
 
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.User;

@@ -2,11 +2,10 @@ package com.example.simple_todo.controller;
 
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.ErrorDto;
-import com.example.simple_todo.dto.InfoDto;
-import com.example.simple_todo.request.AuthRequest;
-import com.example.simple_todo.request.RegistrationRequest;
-import com.example.simple_todo.jwt_util.JwtTokenUtil;
-import com.example.simple_todo.response.AuthResponse;
+import com.example.simple_todo.dto.AuthRequest;
+import com.example.simple_todo.dto.RegistrationRequest;
+import com.example.simple_todo.service.JwtTokenUtil;
+import com.example.simple_todo.dto.AuthResponse;
 import com.example.simple_todo.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
