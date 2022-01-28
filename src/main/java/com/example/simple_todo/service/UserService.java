@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public User getUserById(Long id) {
@@ -23,15 +26,19 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public void saveUser(User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+    public void saveUser(String username, String password) {
+        String encodedPass = bCryptPasswordEncoder.encode(password);
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(encodedPass);
+
         userRepository.save(user);
     }
 
     public User getUserByUsernameAndPassword(String username, String password) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (encoder.matches(password, user.getPassword()))
+        if (bCryptPasswordEncoder.matches(password, user.getPassword()))
             return user;
         else
             throw new InvalidPasswordException();

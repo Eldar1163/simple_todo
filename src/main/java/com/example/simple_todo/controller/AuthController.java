@@ -31,12 +31,8 @@ public class AuthController {
         if (userService.isUserExists(registrationRequest.getUsername()))
             return new ErrorDto("User with name " + registrationRequest.getUsername() + " already exists.");
 
-        User user = new User();
-        user.setPassword(registrationRequest.getPassword());
-        user.setUsername(registrationRequest.getUsername());
-
-        userService.saveUser(user);
-        return new InfoDto("Registration complete. Log in to take jwt token.");
+        userService.saveUser(registrationRequest.getUsername(), registrationRequest.getPassword());
+        return null;
     }
 
     @PostMapping("/api/todo/auth")
