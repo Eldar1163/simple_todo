@@ -3,7 +3,7 @@ package com.example.simple_todo;
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.UserClaims;
-import com.example.simple_todo.jwt_util.JwtTokenUtil;
+import com.example.simple_todo.service.JwtTokenUtil;
 import com.example.simple_todo.service.UserService;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtTokenUtilTest {
+    private final ConfigProperties configProperties;
 
     @Mock
     private UserService userService;
@@ -38,13 +39,15 @@ public class JwtTokenUtilTest {
         user = new User();
         user.setId(userId);
         user.setUsername(username);
+
+        configProperties = new ConfigProperties();
+        configProperties.setJwt(new ConfigProperties.Jwt());
+        configProperties.getJwt().setSecret(secret);
+        configProperties.getJwt().setToken_validity_in_millis(18000000L);
     }
 
     @BeforeEach
     void init() {
-        ConfigProperties configProperties = new ConfigProperties();
-        configProperties.setJwt(new ConfigProperties.Jwt());
-        configProperties.getJwt().setSecret(secret);
         jwtTokenUtil = new JwtTokenUtil(userService, configProperties);
     }
 
@@ -69,7 +72,7 @@ public class JwtTokenUtilTest {
 
         long dateDiff = expDate.getTime() - curDate.getTime();
 
-        boolean correctExpDate = (Math.abs(dateDiff - JwtTokenUtil.JWT_TOKEN_VALIDITY) < 5 * 1000);
+        boolean correctExpDate = (Math.abs(dateDiff - configProperties.getJwt().getToken_validity_in_millis()) < 5 * 1000);
         boolean isSigned = false;
 
         try {
