@@ -1,4 +1,4 @@
-package com.example.simple_todo.entry_point;
+package com.example.simple_todo.config;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

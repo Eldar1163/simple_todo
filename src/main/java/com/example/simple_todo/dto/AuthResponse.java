@@ -1,4 +1,4 @@
-package com.example.simple_todo.response;
+package com.example.simple_todo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

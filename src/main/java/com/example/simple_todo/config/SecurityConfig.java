@@ -1,6 +1,5 @@
 package com.example.simple_todo.config;
 
-import com.example.simple_todo.entry_point.RestAuthenticationEntryPoint;
 import com.example.simple_todo.config.jwt.JwtFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

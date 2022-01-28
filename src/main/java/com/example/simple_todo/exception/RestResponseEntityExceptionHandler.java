@@ -1,4 +1,4 @@
-package com.example.simple_todo.exception_handler;
+package com.example.simple_todo.exception;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
