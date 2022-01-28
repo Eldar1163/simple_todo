@@ -11,9 +11,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -38,22 +36,13 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getExpiration);
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
     }
 
     public boolean isNotExpiredToken(String token) {
         final Date expirationDate = getExpirationDateFromToken(token);
         final Date currentDate = new Date(System.currentTimeMillis());
         return currentDate.before(expirationDate);
-    }
-
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
     public String generateToken(Long userID) {
@@ -64,7 +53,7 @@ public class JwtTokenUtil implements Serializable {
         return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY)).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
-    public UserClaims getUserJwtDtoFromToken(String token) {
+    public UserClaims getUserClaimsFromToken(String token) {
         @SuppressWarnings("unchecked")
         Map<String, Object> userMap = (Map<String, Object>) Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get(userInfoClaimStr);
         return new UserClaims(((Number) userMap.get("id")).longValue(), (String) userMap.get("username"));
@@ -72,7 +61,8 @@ public class JwtTokenUtil implements Serializable {
 
     public Boolean isValidToken(String token) {
         try {
-            return Jwts.parser().setSigningKey(secret).isSigned(token) && isNotExpiredToken(token);
+            Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
+            return isNotExpiredToken(token);
         } catch (Exception exception) {
             return false;
         }

@@ -30,7 +30,7 @@ public class JwtFilter extends GenericFilterBean {
         String authStr = ((HttpServletRequest) servletRequest).getHeader(AUTHORIZATION);
         String token = jwtTokenUtil.getTokenFromAuthHeader(authStr);
         if (token != null && jwtTokenUtil.isValidToken(token)) {
-            UserClaims userClaims = jwtTokenUtil.getUserJwtDtoFromToken(token);
+            UserClaims userClaims = jwtTokenUtil.getUserClaimsFromToken(token);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userClaims, null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
