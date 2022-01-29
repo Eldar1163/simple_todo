@@ -64,12 +64,7 @@ public class TodoService {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
             todo.setUpdatedAt(LocalDateTime.now());
-            TodoUpdateDto responseDto = new TodoUpdateDto(
-                    todo.getId(),
-                    todo.getTitle(),
-                    todo.getDone(),
-                    todo.getCreatedAt(),
-                    todo.getUpdatedAt());
+            TodoUpdateDto responseDto = ObjectMapperUtils.map(todo, TodoUpdateDto.class);
             todoRepository.save(todo);
             return responseDto;
         }
