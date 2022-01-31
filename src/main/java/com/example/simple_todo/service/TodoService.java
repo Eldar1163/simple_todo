@@ -42,6 +42,9 @@ public class TodoService {
                 todoRepository.findById(todoCreate.getParent())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")) :
                 null;
+        if (parent != null && !parent.getUser().getId().equals(id))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot create todo with parent id = " + todoCreate.getParent());
         LocalDateTime currentDateTime = LocalDateTime.now();
         Todo todo = new Todo(
                 user,
