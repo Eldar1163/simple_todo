@@ -32,7 +32,7 @@ public class JwtTokenUtil implements Serializable {
     public JwtTokenUtil(UserService userService, ConfigProperties configProperties) {
         this.userService = userService;
         secret = configProperties.getJwt().getSecret();
-        jwt_token_validity = configProperties.getJwt().getToken_validity_in_millis();
+        jwt_token_validity = configProperties.getJwt().getTokenValidityInMillis();
     }
 
     public Date getExpirationDateFromToken(String token) {

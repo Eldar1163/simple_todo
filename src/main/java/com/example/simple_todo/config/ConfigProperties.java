@@ -14,6 +14,6 @@ public class ConfigProperties {
     @Data
     public static class Jwt {
         private String secret;
-        private Long token_validity_in_millis;
+        private Long tokenValidityInMillis;
     }
 }
