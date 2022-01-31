@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
@@ -19,18 +20,24 @@ public class TodoService {
 
     private final UserRepository userRepository;
 
+    private final TodoMapper todoMapper;
+
     public TodoService(TodoRepository todoRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       TodoMapper todoMapper) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
+        this.todoMapper = todoMapper;
     }
 
     public List<TodoReadDto> getAll(Authentication auth) {
         Long id = ((UserClaims)auth.getPrincipal()).getId();
 
-        return ObjectMapperUtils.mapAll(
-                todoRepository.findAllByUserIdAndParentIsNull(id),
-                TodoReadDto.class);
+        List<Todo> todoList = todoRepository.findAllByUserIdAndParentIsNull(id);
+
+        return todoList.stream()
+                .map(todoMapper::todoToTodoReadDto)
+                .collect(Collectors.toList());
     }
 
     public TodoReadDto create(Authentication auth, TodoCreateDto todoCreate) {
@@ -54,7 +61,7 @@ public class TodoService {
                 currentDateTime,
                 currentDateTime);
         todoRepository.save(todo);
-        return ObjectMapperUtils.map(todo, TodoReadDto.class);
+        return todoMapper.todoToTodoReadDto(todo);
     }
 
     public TodoUpdateDto update(Authentication auth, TodoUpdateDto todoUpdate) {
@@ -67,7 +74,7 @@ public class TodoService {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
             todo.setUpdatedAt(LocalDateTime.now());
-            TodoUpdateDto responseDto = ObjectMapperUtils.map(todo, TodoUpdateDto.class);
+            TodoUpdateDto responseDto = todoMapper.todoToTodoUpdateDto(todo);
             todoRepository.save(todo);
             return responseDto;
         }
