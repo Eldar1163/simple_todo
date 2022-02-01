@@ -1,7 +1,6 @@
 package com.example.simple_todo.service;
 
 import com.example.simple_todo.config.ConfigProperties;
-import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.UserClaims;
 import org.springframework.stereotype.Component;
 
@@ -27,10 +26,7 @@ public class JwtTokenUtil implements Serializable {
 
     public final long jwt_token_validity;
 
-    private final UserService userService;
-
-    public JwtTokenUtil(UserService userService, ConfigProperties configProperties) {
-        this.userService = userService;
+    public JwtTokenUtil(ConfigProperties configProperties) {
         secret = configProperties.getJwt().getSecret();
         jwt_token_validity = configProperties.getJwt().getTokenValidityInMillis();
     }
@@ -45,11 +41,10 @@ public class JwtTokenUtil implements Serializable {
         return currentDate.before(expirationDate);
     }
 
-    public String generateToken(Long userID) {
-        User user = userService.getUserById(userID);
+    public String generateToken(UserClaims userClaims) {
         Map<String, Object> userMap = new HashMap<>();
-        userMap.put("id", user.getId());
-        userMap.put("username", user.getUsername());
+        userMap.put("id", userClaims.getId());
+        userMap.put("username", userClaims.getUsername());
         return Jwts.builder().claim(userInfoClaimStr, userMap).setExpiration(new Date(System.currentTimeMillis() + jwt_token_validity)).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 

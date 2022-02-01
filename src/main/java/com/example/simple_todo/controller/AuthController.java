@@ -3,6 +3,7 @@ package com.example.simple_todo.controller;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.AuthRequestDto;
 import com.example.simple_todo.dto.RegistrationRequestDto;
+import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
 import com.example.simple_todo.dto.AuthResponseDto;
 import com.example.simple_todo.service.UserService;
@@ -40,7 +41,7 @@ public class AuthController {
     @PostMapping("/api/todo/auth")
     public AuthResponseDto auth(@RequestBody @Valid AuthRequestDto request) {
         User user = userService.getUserByUsernameAndPassword(request.getUsername(), request.getPassword());
-        String token = jwtTokenUtil.generateToken(user.getId());
+        String token = jwtTokenUtil.generateToken(new UserClaims(user.getId(), user.getUsername()));
         return new AuthResponseDto(token);
     }
 }
