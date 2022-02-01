@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class UserNotFoundExceptionHandler {
+public class NotFoundExceptionHandler {
     @ResponseBody
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    ErrorDto userNotFoundHandler(UserNotFoundException exception) {
+    ErrorDto notFoundHandler(NotFoundException exception) {
         return new ErrorDto(exception.getMessage());
     }
 }

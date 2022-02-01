@@ -3,15 +3,16 @@ package com.example.simple_todo.service;
 import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.*;
+import com.example.simple_todo.exception.NotFoundException;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
@@ -19,29 +20,35 @@ public class TodoService {
 
     private final UserRepository userRepository;
 
+    private final TodoMapper todoMapper;
+
     public TodoService(TodoRepository todoRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       TodoMapper todoMapper) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
+        this.todoMapper = todoMapper;
     }
 
-    public List<TodoReadDto> getAll(Authentication auth) {
-        Long id = ((UserClaims)auth.getPrincipal()).getId();
+    public List<TodoReadDto> getAll(Long userId) {
+        List<Todo> todoList = todoRepository.findAllByUserIdAndParentIsNull(userId);
 
-        return ObjectMapperUtils.mapAll(
-                todoRepository.findAllByUserIdAndParentIsNull(id),
-                TodoReadDto.class);
+        return todoList.stream()
+                .map(todoMapper::todoToTodoReadDto)
+                .collect(Collectors.toList());
     }
 
-    public TodoReadDto create(Authentication auth, TodoCreateDto todoCreate) {
-        Long id = ((UserClaims)auth.getPrincipal()).getId();
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found user, check your token")
+    public TodoReadDto create(Long userId, TodoCreateDto todoCreate) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Cannot found user, check your token")
         );
         Todo parent = (todoCreate.getParent() != null) ?
                 todoRepository.findById(todoCreate.getParent())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find parent todo")) :
+                        .orElseThrow(() -> new NotFoundException("Cannot find parent todo")) :
                 null;
+        if (parent != null && !parent.getUser().getId().equals(userId))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot create todo with parent id = " + todoCreate.getParent());
         LocalDateTime currentDateTime = LocalDateTime.now();
         Todo todo = new Todo(
                 user,
@@ -51,37 +58,30 @@ public class TodoService {
                 currentDateTime,
                 currentDateTime);
         todoRepository.save(todo);
-        return ObjectMapperUtils.map(todo, TodoReadDto.class);
+        return todoMapper.todoToTodoReadDto(todo);
     }
 
-    public TodoUpdateDto update(Authentication auth, TodoUpdateDto todoUpdate) {
+    public TodoUpdateDto update(Long userId, TodoUpdateDto todoUpdate) {
         Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
-                () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Cannot found todo with id = " + todoUpdate.getId()));
-        Long userId = ((UserClaims)auth.getPrincipal()).getId();
+                () -> new NotFoundException("Cannot found todo with id = " + todoUpdate.getId()));
         if (userId.equals(todo.getUser().getId())) {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
             todo.setUpdatedAt(LocalDateTime.now());
-            TodoUpdateDto responseDto = ObjectMapperUtils.map(todo, TodoUpdateDto.class);
             todoRepository.save(todo);
-            return responseDto;
+            return todoMapper.todoToTodoUpdateDto(todo);
         }
         else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Cannot found todo with id = " + todoUpdate.getId());
+            throw new NotFoundException("Cannot found todo with id = " + todoUpdate.getId());
         }
     }
 
-    public void delete(Authentication auth, Long id) {
-        Long userId = ((UserClaims)auth.getPrincipal()).getId();
-        Todo todo = todoRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found todo with id = " + id));
+    public void delete(Long userId, Long todoId) {
+        Todo todo = todoRepository.findById(todoId).orElseThrow(
+                () -> new NotFoundException("Cannot found todo with id = " + todoId));
         if (userId.equals(todo.getUser().getId()))
             todoRepository.delete(todo);
         else
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found todo with id = " + id);
+            throw new NotFoundException("Cannot found todo with id = " + todoId);
     }
 }

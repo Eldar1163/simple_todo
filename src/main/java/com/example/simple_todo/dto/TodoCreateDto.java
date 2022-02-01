@@ -14,6 +14,6 @@ public class TodoCreateDto {
     @NotBlank(message = "Title is mandatory")
     private String title;
 
-    @Min(value = 1)
+    @Min(value = 1, message = "Todo id must be greater than 0")
     private Long parent;
 }

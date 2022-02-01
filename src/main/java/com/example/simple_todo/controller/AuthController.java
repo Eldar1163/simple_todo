@@ -1,15 +1,17 @@
 package com.example.simple_todo.controller;
 
 import com.example.simple_todo.domain.User;
-import com.example.simple_todo.dto.ErrorDto;
-import com.example.simple_todo.dto.AuthRequest;
-import com.example.simple_todo.dto.RegistrationRequest;
+import com.example.simple_todo.dto.AuthRequestDto;
+import com.example.simple_todo.dto.RegistrationRequestDto;
+import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
-import com.example.simple_todo.dto.AuthResponse;
+import com.example.simple_todo.dto.AuthResponseDto;
 import com.example.simple_todo.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
@@ -26,18 +28,20 @@ public class AuthController {
     }
 
     @PostMapping("/api/todo/register")
-    public Object registerUser(@RequestBody @Valid RegistrationRequest registrationRequest) {
-        if (userService.isUserExists(registrationRequest.getUsername()))
-            return new ErrorDto("User with name " + registrationRequest.getUsername() + " already exists.");
+    public Object registerUser(@RequestBody @Valid RegistrationRequestDto registrationRequestDto) {
+        if (userService.isUserExists(registrationRequestDto.getUsername()))
+            throw new ResponseStatusException(
+                  HttpStatus.CONFLICT,
+                  "User with name " + registrationRequestDto.getUsername() + " already exists.");
 
-        userService.saveUser(registrationRequest.getUsername(), registrationRequest.getPassword());
+        userService.saveUser(registrationRequestDto.getUsername(), registrationRequestDto.getPassword());
         return null;
     }
 
     @PostMapping("/api/todo/auth")
-    public AuthResponse auth(@RequestBody @Valid AuthRequest request) {
+    public AuthResponseDto auth(@RequestBody @Valid AuthRequestDto request) {
         User user = userService.getUserByUsernameAndPassword(request.getUsername(), request.getPassword());
-        String token = jwtTokenUtil.generateToken(user.getId());
-        return new AuthResponse(token);
+        String token = jwtTokenUtil.generateToken(new UserClaims(user.getId(), user.getUsername()));
+        return new AuthResponseDto(token);
     }
 }
