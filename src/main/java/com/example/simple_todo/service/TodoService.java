@@ -68,9 +68,8 @@ public class TodoService {
             todo.setTitle(todoUpdate.getTitle());
             todo.setDone(todoUpdate.getDone());
             todo.setUpdatedAt(LocalDateTime.now());
-            TodoUpdateDto responseDto = todoMapper.todoToTodoUpdateDto(todo);
             todoRepository.save(todo);
-            return responseDto;
+            return todoMapper.todoToTodoUpdateDto(todo);
         }
         else {
             throw new NotFoundException("Cannot found todo with id = " + todoUpdate.getId());
