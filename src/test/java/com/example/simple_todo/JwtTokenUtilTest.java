@@ -1,43 +1,32 @@
 package com.example.simple_todo;
 
 import com.example.simple_todo.config.ConfigProperties;
-import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
 import io.jsonwebtoken.Jwts;
-import org.junit.jupiter.api.BeforeEach;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JwtTokenUtilTest {
-    private final ConfigProperties configProperties;
-
-    private JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenUtil jwtTokenUtil;
 
     private static final String secret = "dsVkjsfcejkASFnbAFJKWvlqjndsv";
 
-    private final Long userId;
-    private final String username;
+    private static final Long userId = 7L;
+    private static final String username = "user";
 
     public JwtTokenUtilTest() {
-        userId = 7L;
-        username = "user";
-
-        User user = new User();
-        user.setId(userId);
-        user.setUsername(username);
-
-        configProperties = new ConfigProperties();
+        ConfigProperties configProperties = new ConfigProperties();
         configProperties.setJwt(new ConfigProperties.Jwt());
         configProperties.getJwt().setSecret(secret);
         configProperties.getJwt().setTokenValidityInMillis(18000000L);
-    }
 
-    @BeforeEach
-    void init() {
         jwtTokenUtil = new JwtTokenUtil(configProperties);
     }
 
@@ -55,21 +44,22 @@ public class JwtTokenUtilTest {
     public void validToken() {
         String token = jwtTokenUtil.generateToken(new UserClaims(userId, username));
 
-        Date curDate = new Date(System.currentTimeMillis());
-        try {
-            Date expDate = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
-            assertTrue(curDate.before(expDate));
-        } catch (Exception exception) {
-            fail();
-        }
+        assertTrue(jwtTokenUtil.isValidToken(token));
     }
 
     @Test
     public void invalidToken() {
-        String token = jwtTokenUtil.generateToken(new UserClaims(userId, username));
-        String invalidToken = token.substring(0, token.length() - 3);
+        String userInfoClaimStr = "user-info";
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", userId);
+        userMap.put("username", username);
+        String invalidSecret = "InvalidSecretForTest";
+        String token = Jwts.
+                builder().
+                claim(userInfoClaimStr, userMap).
+                setExpiration(new Date(System.currentTimeMillis() + 18000000L)).
+                signWith(SignatureAlgorithm.HS512, invalidSecret).compact();
 
-        assertTrue(jwtTokenUtil.isValidToken(token));
-        assertFalse(jwtTokenUtil.isValidToken(invalidToken));
+        assertFalse(jwtTokenUtil.isValidToken(token));
     }
 }
