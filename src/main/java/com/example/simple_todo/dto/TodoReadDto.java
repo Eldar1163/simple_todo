@@ -1,6 +1,5 @@
 package com.example.simple_todo.dto;
 
-import com.example.simple_todo.domain.Todo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -18,5 +17,5 @@ public class TodoReadDto {
 
     private LocalDateTime updatedAt;
 
-    private List<Todo> subtasks;
+    private List<TodoReadDto> subtasks;
 }
