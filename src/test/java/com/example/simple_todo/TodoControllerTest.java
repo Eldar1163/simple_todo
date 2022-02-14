@@ -5,7 +5,7 @@ import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.TodoCreateDto;
 import com.example.simple_todo.dto.TodoReadDto;
 import com.example.simple_todo.dto.TodoUpdateDto;
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.domain.UserClaims;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import com.example.simple_todo.service.JwtTokenUtil;
@@ -147,20 +147,21 @@ public class TodoControllerTest {
         if (list1.size() != list2.size())
             return false;
         else {
-            boolean res = true;
+            list1.sort(Comparator.comparing(TodoReadDto::getId));
+            list2.sort(Comparator.comparing(TodoReadDto::getId));
             for (int i = 0; i < list1.size(); i++) {
-                list1.sort(Comparator.comparing(TodoReadDto::getId));
-                list2.sort(Comparator.comparing(TodoReadDto::getId));
                 TodoReadDto todo1 = list1.get(i);
                 TodoReadDto todo2 = list2.get(i);
-                res = res &&
-                        (
+                if (
+                        !(
                         todo1.getId().equals(todo2.getId()) &&
                         todo1.getTitle().equals(todo2.getTitle()) &&
                         todo1.getDone().equals(todo2.getDone())
-                        ) && compareTodoList(todo1.getSubtasks(), todo2.getSubtasks());
+                        ) && compareTodoList(todo1.getSubtasks(), todo2.getSubtasks())
+                )
+                    return false;
             }
-            return res;
+            return true;
         }
     }
     

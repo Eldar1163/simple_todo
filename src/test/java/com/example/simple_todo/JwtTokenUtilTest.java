@@ -1,7 +1,7 @@
 package com.example.simple_todo;
 
 import com.example.simple_todo.config.ConfigProperties;
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.domain.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

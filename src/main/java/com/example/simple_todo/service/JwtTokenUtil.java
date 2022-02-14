@@ -1,7 +1,7 @@
 package com.example.simple_todo.service;
 
 import com.example.simple_todo.config.ConfigProperties;
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.domain.UserClaims;
 import org.springframework.stereotype.Component;
 
 import java.io.Serial;

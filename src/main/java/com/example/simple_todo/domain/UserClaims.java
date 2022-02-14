@@ -1,4 +1,4 @@
-package com.example.simple_todo.dto;
+package com.example.simple_todo.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
