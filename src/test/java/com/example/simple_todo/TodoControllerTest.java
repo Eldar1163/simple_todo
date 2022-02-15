@@ -66,7 +66,6 @@ public class TodoControllerTest {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(userPassword));
         userId = userRepository.save(user).getId();
-        user.setId(userId);
         UserClaims userClaims = new UserClaims(userId, username);
         token = jwtTokenUtil.generateToken(userClaims);
     }
@@ -215,7 +214,7 @@ public class TodoControllerTest {
     }
 
     void deleteTodoWhenValidInput(Long todoId) throws Exception {
-        assertTrue(todoRepository.findById(todoId).isPresent());
+        assertTrue(todoRepository.existsById(todoId));
         mockMvc.perform(
                         delete("/api/todo/" + todoId)
                                 .header("Authorization", "Bearer " + token))
