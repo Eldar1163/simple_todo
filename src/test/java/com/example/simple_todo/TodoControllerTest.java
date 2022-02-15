@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -75,15 +75,14 @@ public class TodoControllerTest {
     void notNestedTodoWhenValidInputTest() throws Exception {
         String title = "Test task";
         String updatedTitle = "Updated test task";
-        assertNotEquals(title, updatedTitle);
 
         Long todoId = postTodoWhenValidInput(title, null).getId();
-        putTodoWhenValidInput(todoId, updatedTitle, true);
+        putTodoWhenValidInput(todoId, updatedTitle, false);
         TodoReadDto todo = getTodosWhenValidInput().get(0);
 
         assertEquals(todo.getId(), todoId);
         assertEquals(todo.getTitle(), updatedTitle);
-        assertEquals(todo.getDone(), true);
+        assertEquals(todo.getDone(), false);
 
         deleteTodoWhenValidInput(todoId);
     }
@@ -178,19 +177,11 @@ public class TodoControllerTest {
                         .andReturn();
         TodoReadDto result = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TodoReadDto.class);
         Long todoId = result.getId();
-        if (todoRepository.findById(todoId).isPresent()) {
-            Todo todoFromDb = todoRepository.findById(todoId).get();
-            assertEquals(todoFromDb.getTitle(), todo.getTitle());
-            if (parentId != null && todoFromDb.getParent() != null)
-                assertEquals(todoFromDb.getParent().getId(), parentId);
-            else {
-                assertNull(parentId);
-                assertNull(todoFromDb.getParent());
-            }
-        }
-        else {
-            fail();
-        }
+        Todo todoFromDb = todoRepository.findById(todoId).get();
+        assertEquals(todoFromDb.getTitle(), todo.getTitle());
+        assertEquals(
+                todoFromDb.getParent() == null ? null : todoFromDb.getParent().getId(),
+                parentId);
         return result;
     }
 
@@ -208,14 +199,10 @@ public class TodoControllerTest {
                                 .content(requestBody)).andExpect(status().is2xxSuccessful())
                 .andReturn();
 
-        if (todoRepository.findById(todoId).isPresent()) {
-            Todo todoFromDb = todoRepository.findById(todoId).get();
-            assertEquals(todoFromDb.getTitle(), todo.getTitle());
-            assertEquals(todoFromDb.getDone(), done);
-        }
-        else {
-            fail();
-        }
+
+        Todo todoFromDb = todoRepository.findById(todoId).get();
+        assertEquals(todoFromDb.getTitle(), todo.getTitle());
+        assertEquals(todoFromDb.getDone(), done);
     }
 
     List<TodoReadDto> getTodosWhenValidInput() throws Exception {
@@ -233,7 +220,7 @@ public class TodoControllerTest {
                         delete("/api/todo/" + todoId)
                                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().is2xxSuccessful());
-        assertFalse(todoRepository.findById(todoId).isPresent());
+        assertFalse(todoRepository.existsById(todoId));
     }
 
     @AfterEach
