@@ -1,6 +1,6 @@
 package com.example.simple_todo.config.jwt;
 
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.domain.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

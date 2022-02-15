@@ -1,7 +1,7 @@
 package com.example.simple_todo.service;
 
 import com.example.simple_todo.domain.User;
-import com.example.simple_todo.dto.UserClaims;
+import com.example.simple_todo.domain.UserClaims;
 import com.example.simple_todo.exception.InvalidPasswordException;
 import com.example.simple_todo.exception.NotFoundException;
 import com.example.simple_todo.repository.UserRepository;

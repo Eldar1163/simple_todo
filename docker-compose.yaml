@@ -6,7 +6,10 @@ services:
     container_name: 'java-postgres'
     ports:
       - 5432:5432
+    volumes:
+      - ./create_test_db.sh:/docker-entrypoint-initdb.d/create_test_db.sh
     environment:
       - 'POSTGRES_USER=sa'
       - 'POSTGRES_PASSWORD=password'
       - 'POSTGRES_DB=tododb'
+      - 'POSTGRES_SECOND_DB=tododbtest'
