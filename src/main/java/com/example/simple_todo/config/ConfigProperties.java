@@ -11,6 +11,8 @@ public class ConfigProperties {
 
     private Jwt jwt;
 
+    private String imageServerPath;
+
     @Data
     public static class Jwt {
         private String secret;
