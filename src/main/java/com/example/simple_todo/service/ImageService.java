@@ -2,7 +2,6 @@ package com.example.simple_todo.service;
 
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.Todo;
-import com.example.simple_todo.exception.BadImageServerResponseException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
