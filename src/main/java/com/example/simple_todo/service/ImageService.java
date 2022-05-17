@@ -3,6 +3,7 @@ package com.example.simple_todo.service;
 import com.example.simple_todo.config.ConfigProperties;
 import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.exception.BadImageServerResponseException;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,10 @@ public class ImageService {
     private final ConfigProperties cofig;
     RestTemplate restTemplate;
 
-    public ImageService(ConfigProperties config) {
+    public ImageService(ConfigProperties config, RestTemplateBuilder builder) {
         this.cofig = config;
 
-        restTemplate = new RestTemplate();
+        restTemplate = builder.build();
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
             public boolean hasError(ClientHttpResponse response) throws IOException {
@@ -33,7 +34,7 @@ public class ImageService {
             }
 
             @Override
-            public void handleError(ClientHttpResponse response) throws IOException {
+            public void handleError(ClientHttpResponse response) {
                 throw new BadImageServerResponseException("Image server error");
             }
         });
