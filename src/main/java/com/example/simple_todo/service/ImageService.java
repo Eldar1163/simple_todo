@@ -5,15 +5,13 @@ import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.exception.BadImageServerResponseException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -26,34 +24,22 @@ public class ImageService {
         url = config.getImageServerPath() + "?taskid={taskId}";
 
         restTemplate = builder.build();
-        restTemplate.setErrorHandler(new ResponseErrorHandler() {
-            @Override
-            public boolean hasError(ClientHttpResponse response) throws IOException {
-                return !(response.getStatusCode() == HttpStatus.NOT_FOUND ||
-                        response.getStatusCode() == HttpStatus.OK);
-            }
-
-            @Override
-            public void handleError(ClientHttpResponse response) {
-                throw new BadImageServerResponseException("Image server error");
-            }
-        });
-
     }
 
     public String getImageInBase64(Long taskId) {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                url,
-                String.class,
-                taskId);
-        if (
-                (response.getStatusCode().is2xxSuccessful() ||
-                response.getBody() != null) &&
-                !response.getBody().equals("Resource not found")
-        )
-            return Base64.getEncoder().encodeToString(response.getBody().getBytes(StandardCharsets.UTF_8));
-        else
-            return null;
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(
+                    url,
+                    String.class,
+                    taskId);
+
+            if (response.getBody() != null)
+                return Base64.getEncoder().encodeToString(response.getBody().getBytes(StandardCharsets.UTF_8));
+        } catch (HttpClientErrorException ignore) {
+
+        }
+
+        return null;
     }
 
     public Boolean storeImageOnServer(Long taskId, MultipartFile imageFile) {
