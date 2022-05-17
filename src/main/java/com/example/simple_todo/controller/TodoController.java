@@ -33,7 +33,7 @@ public class TodoController {
     @PostMapping
     public TodoReadDto create(
             Authentication auth,
-            @RequestPart(name = "metadata")
+            @RequestPart(name = "requestObj")
             @Valid TodoCreateDto todoCreate,
             @RequestPart(name = "image", required = false)
                     MultipartFile imageFile) {
@@ -44,7 +44,7 @@ public class TodoController {
     @PutMapping
     public TodoWithoutSubtaskDto update(
             Authentication auth,
-            @RequestPart(name = "metadata")
+            @RequestPart(name = "requestObj")
             @Valid TodoWithoutSubtaskDto todo,
             @RequestPart(value = "image", required = false)
                     MultipartFile imageFile) {
