@@ -19,11 +19,11 @@ import java.util.Base64;
 
 @Service
 public class ImageService {
-    private final ConfigProperties cofig;
     RestTemplate restTemplate;
+    String url;
 
     public ImageService(ConfigProperties config, RestTemplateBuilder builder) {
-        this.cofig = config;
+        url = config.getImageServerPath() + "?taskid={taskId}";
 
         restTemplate = builder.build();
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
@@ -43,7 +43,7 @@ public class ImageService {
 
     public String getImageInBase64(Long taskId) {
         ResponseEntity<String> response = restTemplate.getForEntity(
-                cofig.getImageServerPath() + "?taskid={taskId}",
+                url,
                 String.class,
                 taskId);
         if (
@@ -73,7 +73,7 @@ public class ImageService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate
                 .postForEntity(
-                        cofig.getImageServerPath() + "?taskid={taskId}",
+                        url,
                         requestEntity,
                         String.class,
                         taskId
@@ -86,12 +86,12 @@ public class ImageService {
         for (Todo t: todo.getSubtasks()) {
             deleteRecursiveImageFromServer(t);
             restTemplate.delete(
-                    cofig.getImageServerPath() + "?taskid={taskId}",
+                    url,
                     t.getId());
         }
 
         restTemplate.delete(
-                cofig.getImageServerPath() + "?taskid={taskId}",
+                url,
                 todo.getId());
     }
 }
