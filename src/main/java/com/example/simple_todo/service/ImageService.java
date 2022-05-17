@@ -1,6 +1,6 @@
 package com.example.simple_todo.service;
 
-import com.example.simple_todo.config.ConfigProperties;
+import com.example.simple_todo.config.ImageServerConfig;
 import com.example.simple_todo.domain.Todo;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -19,8 +19,8 @@ public class ImageService {
     RestTemplate restTemplate;
     String url;
 
-    public ImageService(ConfigProperties config, RestTemplateBuilder builder) {
-        url = config.getImageServerPath() + "?taskid={taskId}";
+    public ImageService(ImageServerConfig config, RestTemplateBuilder builder) {
+        url = config.getPath() + "?taskid={taskId}";
 
         restTemplate = builder.build();
     }
