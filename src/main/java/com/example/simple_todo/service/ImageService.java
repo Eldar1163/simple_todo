@@ -42,8 +42,6 @@ public class ImageService {
     }
 
     public Boolean storeImageOnServer(Long taskId, MultipartFile imageFile) {
-        if (imageFile == null)
-            return true;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
