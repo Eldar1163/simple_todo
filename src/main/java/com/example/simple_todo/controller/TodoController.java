@@ -64,19 +64,18 @@ public class TodoController {
             return;
         if (file.isEmpty())
             throw new BadImageFileException("Your file is empty");
-        if (!isAllowedImage(file.getContentType()))
+        if (!isSupportedContentType(file.getContentType()))
             throw new BadImageFileException("This file type is unsupported");
     }
 
-    private boolean isAllowedImage(String contentType) {
-        return isSupportedContentType(contentType);
-    }
-
     private boolean isSupportedContentType(String contentType) {
-        return contentType.equals("image/bmp")
-                || contentType.equals("image/gif")
-                || contentType.equals("image/png")
-                || contentType.equals("image/jpg")
-                || contentType.equals("image/jpeg");
+        List<String> allowedContentTypes = List.of(
+                "image/bmp",
+                "image/gif",
+                "image/png",
+                "image/jpg",
+                "image/jpeg");
+
+        return allowedContentTypes.contains(contentType);
     }
 }
