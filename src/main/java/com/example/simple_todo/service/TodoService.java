@@ -10,7 +10,7 @@ import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,18 +30,14 @@ public class TodoService {
 
     private final ImageService imageService;
 
-    private final TransactionTemplate transactionTemplate;
-
     public TodoService(TodoRepository todoRepository,
                        UserRepository userRepository,
                        TodoMapper todoMapper,
-                       ImageService imageService,
-                       TransactionTemplate transactionTemplate) {
+                       ImageService imageService) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
         this.todoMapper = todoMapper;
         this.imageService = imageService;
-        this.transactionTemplate = transactionTemplate;
     }
 
     public List<TodoReadDto> getAll(Long userId) {
@@ -80,35 +76,30 @@ public class TodoService {
         Todo todo = todoRepository.findByIdAndUserId(todoWithoutSubtaskDto.getId(), userId).orElseThrow(
                 () -> new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId()));
 
-        todo.setTitle(todoWithoutSubtaskDto.getTitle());
-        todo.setDone(todoWithoutSubtaskDto.getDone());
-        todo.setUpdatedAt(LocalDateTime.now());
-        todo = todoRepository.save(todo);
-
         if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
             serverDelete(todo.getId());
             throw new ImageServiceException("Cannot save your image, try again later.");
         }
 
+        todo.setTitle(todoWithoutSubtaskDto.getTitle());
+        todo.setDone(todoWithoutSubtaskDto.getDone());
+        todo.setUpdatedAt(LocalDateTime.now());
+        todo = todoRepository.save(todo);
+
         return todoMapper.todoToTodoWithoutSubtaskDto(todo, imageFileToBase64Str(imageFile));
     }
 
+    @Transactional
     public void delete(Long userId, Long todoId) {
-        transactionTemplate.execute(status -> {
-            Todo todo = todoRepository.findById(todoId).orElseThrow(
-                    () -> new NotFoundException("Cannot found todo with id = " + todoId));
-            if (userId.equals(todo.getUser().getId())) {
-                todoRepository.delete(todo);
-                imageService.deleteRecursiveImageFromServer(todo);
-            } else
-                throw new NotFoundException("Cannot found todo with id = " + todoId);
-            return status;
-        });
+        Todo todo = todoRepository.findByIdAndUserId(todoId, userId).orElseThrow(
+                () -> new NotFoundException("Cannot found todo with id = " + todoId));
+
+        imageService.deleteRecursiveImageFromServer(todo);
+        todoRepository.delete(todo);
     }
 
     public void serverDelete(Long todoId) {
-        if (todoRepository.findById(todoId).isPresent())
-            todoRepository.delete(todoRepository.findById(todoId).get());
+        todoRepository.findById(todoId).ifPresent(todoRepository::delete);
     }
 
     public String imageFileToBase64Str(MultipartFile imageFile) {

@@ -2,13 +2,13 @@ package com.example.simple_todo.service;
 
 import com.example.simple_todo.config.ImageServerConfig;
 import com.example.simple_todo.domain.Todo;
+import com.example.simple_todo.exception.ImageServiceException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
@@ -66,15 +66,17 @@ public class ImageService {
     }
 
     public void deleteRecursiveImageFromServer(Todo todo) {
-        for (Todo t: todo.getSubtasks()) {
-            deleteRecursiveImageFromServer(t);
+        for (Todo t: todo.getSubtasks())
+            if (t.getSubtasks() != null)
+                deleteRecursiveImageFromServer(t);
+
+        try {
             restTemplate.delete(
                     url,
-                    t.getId());
+                    todo.getId());
+        } catch (HttpStatusCodeException exception) {
+            if (!exception.getStatusCode().is4xxClientError())
+                throw new ImageServiceException("Bad response from image server");
         }
-
-        restTemplate.delete(
-                url,
-                todo.getId());
     }
 }

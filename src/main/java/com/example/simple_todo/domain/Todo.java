@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Todo {
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "parent_id")
+    @ToString.Exclude
     private Todo parent;
 
     private String title;
