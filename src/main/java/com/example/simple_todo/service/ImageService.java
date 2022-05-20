@@ -65,15 +65,19 @@ public class ImageService {
         return response.getStatusCode().is2xxSuccessful();
     }
 
+    public void deleteImageByTaskId(Long id) {
+        restTemplate.delete(
+                url,
+                id);
+    }
+
     public void deleteRecursiveImageFromServer(Todo todo) {
         for (Todo t: todo.getSubtasks())
             if (t.getSubtasks() != null)
                 deleteRecursiveImageFromServer(t);
 
         try {
-            restTemplate.delete(
-                    url,
-                    todo.getId());
+            deleteImageByTaskId(todo.getId());
         } catch (HttpStatusCodeException exception) {
             if (!exception.getStatusCode().is4xxClientError())
                 throw new ImageServiceException("Bad response from image server");

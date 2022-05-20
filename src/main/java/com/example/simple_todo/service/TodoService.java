@@ -45,6 +45,7 @@ public class TodoService {
         return getTodoListWithImages(todoList);
     }
 
+    @Transactional
     public TodoReadDto create(Long userId, TodoCreateDto todoCreate, MultipartFile imageFile) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("Cannot found user, check your token")
@@ -66,19 +67,21 @@ public class TodoService {
                 currentDateTime);
         todo = todoRepository.save(todo);
         if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
-            serverDelete(todo.getId());
             throw new ImageServiceException("Cannot save your image, try again later.");
         }
         return todoMapper.todoToTodoReadDto(todo, imageFileToBase64Str(imageFile));
     }
 
+    @Transactional
     public TodoWithoutSubtaskDto update(Long userId, TodoWithoutSubtaskDto todoWithoutSubtaskDto, MultipartFile imageFile) {
         Todo todo = todoRepository.findByIdAndUserId(todoWithoutSubtaskDto.getId(), userId).orElseThrow(
                 () -> new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId()));
 
         if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
-            serverDelete(todo.getId());
             throw new ImageServiceException("Cannot save your image, try again later.");
+        } else if (imageFile == null)
+        {
+            imageService.deleteImageByTaskId(todo.getId());
         }
 
         todo.setTitle(todoWithoutSubtaskDto.getTitle());
@@ -96,10 +99,6 @@ public class TodoService {
 
         imageService.deleteRecursiveImageFromServer(todo);
         todoRepository.delete(todo);
-    }
-
-    public void serverDelete(Long todoId) {
-        todoRepository.findById(todoId).ifPresent(todoRepository::delete);
     }
 
     public String imageFileToBase64Str(MultipartFile imageFile) {
