@@ -77,22 +77,20 @@ public class TodoService {
     }
 
     public TodoWithoutSubtaskDto update(Long userId, TodoWithoutSubtaskDto todoWithoutSubtaskDto, MultipartFile imageFile) {
-        Todo todo = todoRepository.findById(todoWithoutSubtaskDto.getId()).orElseThrow(
+        Todo todo = todoRepository.findByIdAndUserId(todoWithoutSubtaskDto.getId(), userId).orElseThrow(
                 () -> new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId()));
-        if (userId.equals(todo.getUser().getId())) {
-            todo.setTitle(todoWithoutSubtaskDto.getTitle());
-            todo.setDone(todoWithoutSubtaskDto.getDone());
-            todo.setUpdatedAt(LocalDateTime.now());
-            todo = todoRepository.save(todo);
-            if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
-                serverDelete(todo.getId());
-                throw new ImageServiceException("Cannot save your image, try again later.");
-            }
-            return todoMapper.todoToTodoWithoutSubtaskDto(todo, imageFileToBase64Str(imageFile));
+
+        todo.setTitle(todoWithoutSubtaskDto.getTitle());
+        todo.setDone(todoWithoutSubtaskDto.getDone());
+        todo.setUpdatedAt(LocalDateTime.now());
+        todo = todoRepository.save(todo);
+
+        if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
+            serverDelete(todo.getId());
+            throw new ImageServiceException("Cannot save your image, try again later.");
         }
-        else {
-            throw new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId());
-        }
+
+        return todoMapper.todoToTodoWithoutSubtaskDto(todo, imageFileToBase64Str(imageFile));
     }
 
     public void delete(Long userId, Long todoId) {
