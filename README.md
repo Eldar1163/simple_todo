@@ -72,7 +72,7 @@ curl --location --request POST 'localhost:8080/api/todo/auth' \
 curl --location --request POST 'localhost:8080/api/todo' \
 --header 'Authorization: Bearer <ВАШ_ТОКЕН>' \
 --form 'image=@"/Users/student/Desktop/flower.png"' \
---form 'metadata="{
+--form 'requestObj="{
     \"title\": \"Посадить цветы\"
 }";type=application/json'
 ```
@@ -85,7 +85,7 @@ curl --location --request POST 'localhost:8080/api/todo' \
 curl --location --request PUT 'localhost:8080/api/todo' \
 --header 'Authorization: Bearer <ВАШ_ТОКЕН>' \
 --form 'image=@"/Users/student/Desktop/smile.jpeg"' \
---form 'metadata="{
+--form 'requestObj="{
     \"id\": 39,
     \"title\": \"Улыбнуться\",
     \"done\":false
