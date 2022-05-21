@@ -66,8 +66,8 @@ public class TodoService {
                 currentDateTime,
                 currentDateTime);
         todo = todoRepository.save(todo);
-        if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
-            throw new ImageServiceException("Cannot save your image, try again later.");
+        if (imageFile != null) {
+            imageService.storeImageOnServer(todo.getId(), imageFile);
         }
         return todoMapper.todoToTodoReadDto(todo, imageFileToBase64Str(imageFile));
     }
@@ -77,11 +77,10 @@ public class TodoService {
         Todo todo = todoRepository.findByIdAndUserId(todoWithoutSubtaskDto.getId(), userId).orElseThrow(
                 () -> new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId()));
 
-        if (imageFile != null && !imageService.storeImageOnServer(todo.getId(), imageFile)) {
-            throw new ImageServiceException("Cannot save your image, try again later.");
-        } else if (imageFile == null)
-        {
-            imageService.deleteImageByTaskId(todo.getId());
+        if (imageFile == null) {
+            imageService.deleteImageFromServer(todo.getId());
+        } else {
+            imageService.storeImageOnServer(todo.getId(), imageFile);
         }
 
         todo.setTitle(todoWithoutSubtaskDto.getTitle());
