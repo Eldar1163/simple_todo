@@ -1,6 +1,7 @@
 package com.example.simple_todo.repository;
 
 import com.example.simple_todo.config.ImageServerConfig;
+import com.example.simple_todo.dto.ImageDto;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Repository;
@@ -19,11 +20,11 @@ public class ImageRepository {
         restTemplate = builder.build();
     }
 
-    public ResponseEntity<String> getImage(Long taskId) {
+    public ResponseEntity<ImageDto> getImage(Long taskId) {
         try {
             return restTemplate.getForEntity(
                     url,
-                    String.class,
+                    ImageDto.class,
                     taskId);
         } catch (HttpClientErrorException ignore) {
             return null;

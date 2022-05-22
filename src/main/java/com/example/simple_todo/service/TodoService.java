@@ -112,7 +112,7 @@ public class TodoService {
     }
 
     TodoReadDto addImageToTodo(Todo inputTodo) {
-        return todoMapper.todoToTodoReadDto(inputTodo, imageService.getImageInBase64(inputTodo.getId()));
+        return todoMapper.todoToTodoReadDto(inputTodo, imageService.getImageInBase64(inputTodo.getId()).getImageBase64());
     }
 
     List<TodoReadDto> getTodoListWithImages(List<Todo> inputList) {
