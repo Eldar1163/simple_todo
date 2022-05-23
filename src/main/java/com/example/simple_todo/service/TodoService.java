@@ -16,9 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TodoService {
@@ -42,7 +40,9 @@ public class TodoService {
 
     public List<TodoReadDto> getAll(Long userId) {
         List<Todo> todoList = todoRepository.findAllByUserIdAndParentIsNull(userId);
-        return getTodoListWithImages(todoList);
+        List<Long> taskIds = getIdsFromTodoList(todoList);
+        ImageDto[] images = imageService.getListOfImageInBase64(taskIds);
+        return getTodoListWithImages(todoList, images);
     }
 
     @Transactional
@@ -111,15 +111,31 @@ public class TodoService {
         }
     }
 
-    TodoReadDto addImageToTodo(Todo inputTodo) {
-        return todoMapper.todoToTodoReadDto(inputTodo, imageService.getImageInBase64(inputTodo.getId()).getImageBase64());
+    TodoReadDto addImageToTodo(Todo inputTodo, ImageDto[] imageArray) {
+        final String[] imageBase64Str = new String[1];
+        Arrays.stream(imageArray)
+                .filter(image -> Objects.equals(image.getTaskId(), inputTodo.getId()))
+                .findFirst().ifPresent(image -> imageBase64Str[0] = image.getImageBase64());
+        return todoMapper.todoToTodoReadDto(inputTodo, imageBase64Str[0]);
     }
 
-    List<TodoReadDto> getTodoListWithImages(List<Todo> inputList) {
+    List<Long> getIdsFromTodoList(List<Todo> inputList) {
+        List<Long> result = new ArrayList<>();
+        for (Todo todo: inputList) {
+            if (!todo.getSubtasks().isEmpty()) {
+                result.addAll(getIdsFromTodoList(todo.getSubtasks()));
+            }
+            else
+                result.add(todo.getId());
+        }
+        return result;
+    }
+
+    List<TodoReadDto> getTodoListWithImages(List<Todo> inputList, ImageDto[] imageArray) {
         List<TodoReadDto> outputList = new ArrayList<>();
         for (Todo todo: inputList) {
-            TodoReadDto outputTodo = addImageToTodo(todo);
-            outputTodo.setSubtasks(getTodoListWithImages(todo.getSubtasks()));
+            TodoReadDto outputTodo = addImageToTodo(todo, imageArray);
+            outputTodo.setSubtasks(getTodoListWithImages(todo.getSubtasks(), imageArray));
             outputList.add(outputTodo);
         }
         return outputList;

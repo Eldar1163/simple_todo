@@ -10,23 +10,41 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Repository
 public class ImageRepository {
     private final RestTemplate restTemplate;
     private final String url;
+    private final String baseUrl;
 
     public ImageRepository(ImageServerConfig config, RestTemplateBuilder builder) {
-        url = config.getPath() + "?taskid={taskId}";
+        baseUrl = config.getPath();
+        url = baseUrl + "?taskid={taskId}";
         restTemplate = builder.build();
     }
 
-    public ResponseEntity<ImageDto> getImage(Long taskId) {
+    public ResponseEntity<ImageDto[]> getListOfImages(List<Long> taskIds) {
+        String listUrl = baseUrl + "/list";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body
+                = new LinkedMultiValueMap<>();
+        body.add("idlist", taskIds);
+
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity
+                = new HttpEntity<>(body, headers);
         try {
-            return restTemplate.getForEntity(
-                    url,
-                    ImageDto.class,
-                    taskId);
-        } catch (HttpClientErrorException ignore) {
+            return restTemplate
+                    .postForEntity(
+                            listUrl,
+                            requestEntity,
+                            ImageDto[].class
+                    );
+        } catch (HttpClientErrorException exception) {
             return null;
         }
     }

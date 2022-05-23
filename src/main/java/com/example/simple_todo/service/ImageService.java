@@ -8,6 +8,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 public class ImageService {
     private final ImageRepository imageRepository;
@@ -16,8 +18,8 @@ public class ImageService {
         this.imageRepository = imageRepository;
     }
 
-    public ImageDto getImageInBase64(Long taskId) {
-        ResponseEntity<ImageDto> response = imageRepository.getImage(taskId);
+    public ImageDto[] getListOfImageInBase64(List<Long> taskIds) {
+        ResponseEntity<ImageDto[]> response = imageRepository.getListOfImages(taskIds);
         if (response != null && response.getBody() != null)
             return response.getBody();
 
