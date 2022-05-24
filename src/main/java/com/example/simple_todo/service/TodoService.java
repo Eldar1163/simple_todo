@@ -124,6 +124,7 @@ public class TodoService {
         for (Todo todo: inputList) {
             if (!todo.getSubtasks().isEmpty()) {
                 result.addAll(getIdsFromTodoList(todo.getSubtasks()));
+                result.add(todo.getId());
             }
             else
                 result.add(todo.getId());

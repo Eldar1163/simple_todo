@@ -61,7 +61,6 @@ public class ImageRepository {
         HttpEntity<MultiValueMap<String, Object>> requestEntity
                 = new HttpEntity<>(body, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate
                 .postForEntity(
                         url,
