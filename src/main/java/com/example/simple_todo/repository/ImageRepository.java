@@ -1,8 +1,8 @@
 package com.example.simple_todo.repository;
 
+import com.example.simple_todo.client.RestTemplateFactory;
 import com.example.simple_todo.config.ImageServerConfig;
 import com.example.simple_todo.dto.ImageDto;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,10 +18,10 @@ public class ImageRepository {
     private final String url;
     private final String baseUrl;
 
-    public ImageRepository(ImageServerConfig config, RestTemplateBuilder builder) {
+    public ImageRepository(ImageServerConfig config, RestTemplateFactory restTemplateFactory) {
         baseUrl = config.getPath();
         url = baseUrl + "?taskid={taskId}";
-        restTemplate = builder.build();
+        restTemplate = restTemplateFactory.getObject();
     }
 
     public ResponseEntity<ImageDto[]> getListOfImages(List<Long> taskIds) {

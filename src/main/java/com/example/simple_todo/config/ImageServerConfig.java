@@ -9,4 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "image-server")
 public class ImageServerConfig {
     private String path;
+    private String username;
+    private String password;
 }
