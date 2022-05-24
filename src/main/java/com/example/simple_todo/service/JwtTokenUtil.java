@@ -1,6 +1,6 @@
 package com.example.simple_todo.service;
 
-import com.example.simple_todo.config.ConfigProperties;
+import com.example.simple_todo.config.TodoConfigProperties;
 import com.example.simple_todo.domain.UserClaims;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +26,9 @@ public class JwtTokenUtil implements Serializable {
 
     public final long jwt_token_validity;
 
-    public JwtTokenUtil(ConfigProperties configProperties) {
-        secret = configProperties.getJwt().getSecret();
-        jwt_token_validity = configProperties.getJwt().getTokenValidityInMillis();
+    public JwtTokenUtil(TodoConfigProperties todoConfigProperties) {
+        secret = todoConfigProperties.getJwt().getSecret();
+        jwt_token_validity = todoConfigProperties.getJwt().getTokenValidityInMillis();
     }
 
     public Date getExpirationDateFromToken(String token) {

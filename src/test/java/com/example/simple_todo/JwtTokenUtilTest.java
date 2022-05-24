@@ -1,6 +1,6 @@
 package com.example.simple_todo;
 
-import com.example.simple_todo.config.ConfigProperties;
+import com.example.simple_todo.config.TodoConfigProperties;
 import com.example.simple_todo.domain.UserClaims;
 import com.example.simple_todo.service.JwtTokenUtil;
 import io.jsonwebtoken.Jwts;
@@ -22,12 +22,12 @@ public class JwtTokenUtilTest {
     private static final String username = "user";
 
     public JwtTokenUtilTest() {
-        ConfigProperties configProperties = new ConfigProperties();
-        configProperties.setJwt(new ConfigProperties.Jwt());
-        configProperties.getJwt().setSecret(secret);
-        configProperties.getJwt().setTokenValidityInMillis(18000000L);
+        TodoConfigProperties todoConfigProperties = new TodoConfigProperties();
+        todoConfigProperties.setJwt(new TodoConfigProperties.Jwt());
+        todoConfigProperties.getJwt().setSecret(secret);
+        todoConfigProperties.getJwt().setTokenValidityInMillis(18000000L);
 
-        jwtTokenUtil = new JwtTokenUtil(configProperties);
+        jwtTokenUtil = new JwtTokenUtil(todoConfigProperties);
     }
 
     @Test

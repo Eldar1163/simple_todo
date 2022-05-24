@@ -3,6 +3,7 @@
 ### Оно позволяет:
 - Создавать, изменять, удалять задачи
 - Использовать вложенные задачи (nested todos)
+- Присваимвать каждой задаче изображение
 - Регистрировать и аутентифицировать пользователей(при помощи логина и пароля)
 - Авторизовывать пользователей (при помощи JWT токенов)
 - Закреплять за каждым пользователем, созданные им задачи
@@ -17,16 +18,18 @@
 - Docker
 
 ### Запуск приложения
-Перед первым запуском необходимо создать Docker-контейнер , содержащий СУБД. Для этого в корне проекта находится файл **docker-compose.yaml**. Когда контейнер работает, можно запускать само приложение. После запуска, оно становится доступным по адресу: http://localhost:8080
+Перед первым запуском необходимо создать Docker-контейнер , содержащий СУБД. Для этого в корне проекта находится файл **docker-compose.yaml**. Далее необходимо запустить приложение **[ImageStorage](https://github.com/Eldar1163/ImageStorage)** согласно инструкции в README.md. Когда оба приложения работают, можно пользоваться REST API списка задач, который доступен по адресу: http://localhost:8080
 ### API
 **/api/todo**
 
 Все запросы по данному маршруту (кроме маршрутов **/api/todo/register** и **/api/todo/auth**) могут выполнять только авторизованные пользователи. Для авторизации нужно получить токен. Далее в запрос нужно включить заголовок **Authorization**. Пример (вместо <ВАШ_ТОКЕН> нужно вставить полученный при авторизации токен):
 ```
-GET /api/todo HTTP/1.1
-Host: localhost:8080
-Authorization: Bearer <ВАШ_ТОКЕН>
+curl --location --request http_method_name 'localhost:8080/api/todo' \
+--header 'Authorization: Bearer  <ВАШ_ТОКЕН>
 ```
+
+Здесь вместо **http_method_name** вставить необходимый метод (GET, POST, PUT, DELETE)
+
 - `GET`: Получить список задач авторизованного пользователя
 - `POST`: Добавить новую задачу
 - `PUT`: Изменить существующую задачу
@@ -45,67 +48,55 @@ Authorization: Bearer <ВАШ_ТОКЕН>
 ### Регистрация пользователя
 Для регистрации надо задать имя пользователя и пароль.
 ```
-POST /api/todo/register HTTP/1.1
-Host: localhost:8080
-Content-Type: application/json
-Content-Length: 51
-
-{
+curl --location --request POST 'localhost:8080/api/todo/register' \
+--header 'Content-Type: application/json' \
+--data-raw '{
     "username": "test",
     "password": "12345"
-}
+}'
 ```
 ### Авторизация пользователя
 Для авторизации тоже нужно задать имя пользователя и пароль.
 ```
-POST /api/todo/auth HTTP/1.1
-Host: localhost:8080
-Content-Type: application/json
-Content-Length: 54
-
-{
+curl --location --request POST 'localhost:8080/api/todo/auth' \
+--header 'Content-Type: application/json' \
+--data-raw '{
     "username": "test",
     "password": "12345"
-}
+}'
 ```
 При успешной авторизации пользователь получит в ответе токен.
 
 ### Создание задачи
 ```
-POST /api/todo HTTP/1.1
-Host: localhost:8080
-Authorization: Bearer <ВАШ_ТОКЕН>
-Content-Type: application/json
-Content-Length: 47
-
-{
-    "title": "Позаниматься иностранным языком",
-    "parent": 2
-}
+curl --location --request POST 'localhost:8080/api/todo' \
+--header 'Authorization: Bearer <ВАШ_ТОКЕН>' \
+--form 'image=@"/Users/student/Desktop/flower.png"' \
+--form 'requestObj="{
+    \"title\": \"Посадить цветы\"
+}";type=application/json'
 ```
 Здесь **title** - это описание задачи.
 В данном примере использован необязательный параметр parent, который требуется указать если нужно задать "родительскую" задачу.
+Также присутствует необязательный элемент формы **image**, который необходимо указать если желаете добавить картинку к задаче.
 
 ### Изменение задачи
 ```
-PUT /api/todo HTTP/1.1
-Host: localhost:8080
-Authorization: Bearer <ВАШ_ТОКЕН>
-Content-Type: application/json
-Content-Length: 65
-
-{
-    "id": 1,
-    "title": "Измененная задача",
-    "done": true
-}
+curl --location --request PUT 'localhost:8080/api/todo' \
+--header 'Authorization: Bearer <ВАШ_ТОКЕН>' \
+--form 'image=@"/Users/student/Desktop/smile.jpeg"' \
+--form 'requestObj="{
+    \"id\": 39,
+    \"title\": \"Улыбнуться\",
+    \"done\":false
+}";type=application/json'
 ```
 Здесь **id** - это идентификатор изменяемой задачи в БД, **title** - измененное описание задачи, **done** - это флаг, сигнализирующий о том, что задача уже выполнена или нет.
+Также присутствует необязательный элемент формы **image**, который необходимо указать если желаете добавить картинку к задаче.
 
 ### Удаление задачи
 ```
-DELETE /api/todo/<ИДЕНТИФИКАТОР_УДАЛЯЕМОЙ_ЗАДАЧИ> HTTP/1.1
-Host: localhost:8080
-Authorization: Bearer <ВАШ_ТОКЕН>
+curl --location --request DELETE 'localhost:8080/api/todo/<ИДЕНТИФИКАТОР_УДАЛЯЕМОЙ_ЗАДАЧИ>' \
+--header 'Authorization: Bearer <ВАШ_ТОКЕН>'
 ```
 Здесь вместо **<ИДЕНТИФИКАТОР_УДАЛЯЕМОЙ_ЗАДАЧИ>** нужно вставить этот самый идентификатор.

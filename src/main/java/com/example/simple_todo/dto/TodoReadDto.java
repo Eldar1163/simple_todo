@@ -9,6 +9,8 @@ import java.util.List;
 public class TodoReadDto {
     private Long id;
 
+    private String image;
+
     private String title;
 
     private Boolean done;

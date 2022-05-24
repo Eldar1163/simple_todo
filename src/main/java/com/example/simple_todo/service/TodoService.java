@@ -4,16 +4,19 @@ import com.example.simple_todo.converter.TodoMapper;
 import com.example.simple_todo.domain.Todo;
 import com.example.simple_todo.domain.User;
 import com.example.simple_todo.dto.*;
+import com.example.simple_todo.exception.ImageServiceException;
 import com.example.simple_todo.exception.NotFoundException;
 import com.example.simple_todo.repository.TodoRepository;
 import com.example.simple_todo.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class TodoService {
@@ -23,23 +26,27 @@ public class TodoService {
 
     private final TodoMapper todoMapper;
 
+    private final ImageService imageService;
+
     public TodoService(TodoRepository todoRepository,
                        UserRepository userRepository,
-                       TodoMapper todoMapper) {
+                       TodoMapper todoMapper,
+                       ImageService imageService) {
         this.todoRepository = todoRepository;
         this.userRepository = userRepository;
         this.todoMapper = todoMapper;
+        this.imageService = imageService;
     }
 
     public List<TodoReadDto> getAll(Long userId) {
         List<Todo> todoList = todoRepository.findAllByUserIdAndParentIsNull(userId);
-
-        return todoList.stream()
-                .map(todoMapper::todoToTodoReadDto)
-                .collect(Collectors.toList());
+        List<Long> taskIds = getIdsFromTodoList(todoList);
+        ImageDto[] images = imageService.getListOfImageInBase64(taskIds);
+        return getTodoListWithImages(todoList, images);
     }
 
-    public TodoReadDto create(Long userId, TodoCreateDto todoCreate) {
+    @Transactional
+    public TodoReadDto create(Long userId, TodoCreateDto todoCreate, MultipartFile imageFile) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("Cannot found user, check your token")
         );
@@ -58,31 +65,81 @@ public class TodoService {
                 false,
                 currentDateTime,
                 currentDateTime);
-        todoRepository.save(todo);
-        return todoMapper.todoToTodoReadDto(todo);
+        todo = todoRepository.save(todo);
+        if (imageFile != null) {
+            imageService.storeImageOnServer(todo.getId(), imageFile);
+        }
+        return todoMapper.todoToTodoReadDto(todo, imageFileToBase64Str(imageFile));
     }
 
-    public TodoUpdateDto update(Long userId, TodoUpdateDto todoUpdate) {
-        Todo todo = todoRepository.findById(todoUpdate.getId()).orElseThrow(
-                () -> new NotFoundException("Cannot found todo with id = " + todoUpdate.getId()));
-        if (userId.equals(todo.getUser().getId())) {
-            todo.setTitle(todoUpdate.getTitle());
-            todo.setDone(todoUpdate.getDone());
-            todo.setUpdatedAt(LocalDateTime.now());
-            todoRepository.save(todo);
-            return todoMapper.todoToTodoUpdateDto(todo);
+    @Transactional
+    public TodoWithoutSubtaskDto update(Long userId, TodoWithoutSubtaskDto todoWithoutSubtaskDto, MultipartFile imageFile) {
+        Todo todo = todoRepository.findByIdAndUserId(todoWithoutSubtaskDto.getId(), userId).orElseThrow(
+                () -> new NotFoundException("Cannot found todo with id = " + todoWithoutSubtaskDto.getId()));
+
+        if (imageFile == null) {
+            imageService.deleteImageFromServer(todo.getId());
+        } else {
+            imageService.storeImageOnServer(todo.getId(), imageFile);
         }
-        else {
-            throw new NotFoundException("Cannot found todo with id = " + todoUpdate.getId());
-        }
+
+        todo.setTitle(todoWithoutSubtaskDto.getTitle());
+        todo.setDone(todoWithoutSubtaskDto.getDone());
+        todo.setUpdatedAt(LocalDateTime.now());
+        todo = todoRepository.save(todo);
+
+        return todoMapper.todoToTodoWithoutSubtaskDto(todo, imageFileToBase64Str(imageFile));
     }
 
+    @Transactional
     public void delete(Long userId, Long todoId) {
-        Todo todo = todoRepository.findById(todoId).orElseThrow(
+        Todo todo = todoRepository.findByIdAndUserId(todoId, userId).orElseThrow(
                 () -> new NotFoundException("Cannot found todo with id = " + todoId));
-        if (userId.equals(todo.getUser().getId()))
-            todoRepository.delete(todo);
-        else
-            throw new NotFoundException("Cannot found todo with id = " + todoId);
+
+        imageService.deleteRecursiveImageFromServer(todo);
+        todoRepository.delete(todo);
     }
+
+    public String imageFileToBase64Str(MultipartFile imageFile) {
+        if (imageFile == null)
+            return null;
+        try {
+            byte[] imageBytes = imageFile.getInputStream().readAllBytes();
+            return Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException exception) {
+            throw new ImageServiceException("Something goes wrong");
+        }
+    }
+
+    TodoReadDto addImageToTodo(Todo inputTodo, ImageDto[] imageArray) {
+        final String[] imageBase64Str = new String[1];
+        Arrays.stream(imageArray)
+                .filter(image -> Objects.equals(image.getTaskId(), inputTodo.getId()))
+                .findFirst().ifPresent(image -> imageBase64Str[0] = image.getImageBase64());
+        return todoMapper.todoToTodoReadDto(inputTodo, imageBase64Str[0]);
+    }
+
+    List<Long> getIdsFromTodoList(List<Todo> inputList) {
+        List<Long> result = new ArrayList<>();
+        for (Todo todo: inputList) {
+            if (!todo.getSubtasks().isEmpty()) {
+                result.addAll(getIdsFromTodoList(todo.getSubtasks()));
+                result.add(todo.getId());
+            }
+            else
+                result.add(todo.getId());
+        }
+        return result;
+    }
+
+    List<TodoReadDto> getTodoListWithImages(List<Todo> inputList, ImageDto[] imageArray) {
+        List<TodoReadDto> outputList = new ArrayList<>();
+        for (Todo todo: inputList) {
+            TodoReadDto outputTodo = addImageToTodo(todo, imageArray);
+            outputTodo.setSubtasks(getTodoListWithImages(todo.getSubtasks(), imageArray));
+            outputList.add(outputTodo);
+        }
+        return outputList;
+    }
+
 }
